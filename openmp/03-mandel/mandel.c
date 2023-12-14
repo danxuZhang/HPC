@@ -19,7 +19,6 @@
 #define NPOINTS 1000
 #define MAXITER 1000
 
-
 struct d_complex {
   double r;
   double i;
@@ -60,7 +59,7 @@ int main() {
   printf("Correct answer should be around 1.510659\n");
 }
 
-bool testpoint(const struct d_complex *c) {
+bool testpoint(const struct d_complex* c) {
   // Does the iteration z=z*z+c, until |z| > 2 when point is known to be outside
   // set If loop count reaches MAXITER, point is considered to be inside the set
 
@@ -77,5 +76,6 @@ bool testpoint(const struct d_complex *c) {
       return true;
     }
   }
+
   return false;
 }
