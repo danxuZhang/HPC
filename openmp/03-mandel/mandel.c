@@ -13,17 +13,19 @@
 */
 
 #include <omp.h>
+#include <stdbool.h>
 #include <stdio.h>
 
 #define NPOINTS 1000
 #define MAXITER 1000
 
-void testpoint(void);
 
 struct d_complex {
   double r;
   double i;
 };
+
+bool testpoint(const struct d_complex* c);
 
 struct d_complex c;
 int numoutside = 0;
@@ -36,12 +38,15 @@ int main() {
   //   Mandelbrot set, testing each point to see whether it is inside or outside
   //   the set.
 
-#pragma omp parallel for default(shared) private(c, eps)
+#pragma omp parallel for default(shared) private(i, j, c) firstprivate(eps) \
+    reduction(+ : numoutside)
   for (i = 0; i < NPOINTS; i++) {
     for (j = 0; j < NPOINTS; j++) {
       c.r = -2.0 + 2.5 * (double)(i) / (double)(NPOINTS) + eps;
       c.i = 1.125 * (double)(j) / (double)(NPOINTS) + eps;
-      testpoint();
+      if (testpoint(&c)) {
+        numoutside += 1;
+      }
     }
   }
 
@@ -55,7 +60,7 @@ int main() {
   printf("Correct answer should be around 1.510659\n");
 }
 
-void testpoint(void) {
+bool testpoint(const struct d_complex *c) {
   // Does the iteration z=z*z+c, until |z| > 2 when point is known to be outside
   // set If loop count reaches MAXITER, point is considered to be inside the set
 
@@ -63,14 +68,14 @@ void testpoint(void) {
   int iter;
   double temp;
 
-  z = c;
+  z = *c;
   for (iter = 0; iter < MAXITER; iter++) {
-    temp = (z.r * z.r) - (z.i * z.i) + c.r;
-    z.i = z.r * z.i * 2 + c.i;
+    temp = (z.r * z.r) - (z.i * z.i) + c->r;
+    z.i = z.r * z.i * 2 + c->i;
     z.r = temp;
     if ((z.r * z.r + z.i * z.i) > 4.0) {
-      numoutside++;
-      break;
+      return true;
     }
   }
+  return false;
 }

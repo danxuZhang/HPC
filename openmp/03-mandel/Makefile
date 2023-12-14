@@ -11,8 +11,14 @@ format:
 mandel:
 	$(CC) $(CFLAGS) -fopenmp mandel.c -o mandel.out
 
-run: mandel
+run: 
 	OMP_NUM_THREADS=$(OMP_NUM_THREADS) time ./mandel.out
+
+benchmark:
+	for i in 1 2 4 8; do \
+		echo "\nWith $$i threads:"; \
+		time OMP_NUM_THREADS=$$i ./mandel.out; \
+	done
 
 clean:
 	rm -f $(OUT)
