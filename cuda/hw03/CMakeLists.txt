@@ -1,0 +1,1 @@
+add_executable(hw03_vector_add vector_add.cu)
