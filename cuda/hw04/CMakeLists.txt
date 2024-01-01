@@ -1,0 +1,1 @@
+add_executable(hw04_matrix_sums matrix_sums.cu)
