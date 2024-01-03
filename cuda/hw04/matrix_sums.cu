@@ -17,24 +17,24 @@ const size_t DSIZE = 16384;      // matrix side dimension
 const int block_size = 256;  // CUDA maximum is 1024
 
 // matrix row-sum kernel
-__global__ void row_sums(const float *A, float *sums, size_t ds){
+__global__ void row_sums(const float *A, float *sums, const size_t ds){
 
-  int idx = FIXME // create typical 1D thread index from built-in variables
+  int idx = blockIdx.x * blockDim.x + threadIdx.x; // create typical 1D thread index from built-in variables
   if (idx < ds){
     float sum = 0.0f;
     for (size_t i = 0; i < ds; i++)
-      sum += A[FIXME]         // write a for loop that will cause the thread to iterate across a row, keeeping a running sum, and write the result to sums
+      sum += A[idx * blockDim.x + i];         // write a for loop that will cause the thread to iterate across a row, keeeping a running sum, and write the result to sums
     sums[idx] = sum;
 }}
 
 // matrix column-sum kernel
 __global__ void column_sums(const float *A, float *sums, size_t ds){
 
-  int idx = FIXME // create typical 1D thread index from built-in variables
+  int idx = blockIdx.x * blockDim.x + threadIdx.x; // create typical 1D thread index from built-in variables
   if (idx < ds){
     float sum = 0.0f;
     for (size_t i = 0; i < ds; i++)
-      sum += A[FIXME]         // write a for loop that will cause the thread to iterate down a column, keeeping a running sum, and write the result to sums
+      sum += A[i * blockDim.x + idx];         // write a for loop that will cause the thread to iterate down a column, keeeping a running sum, and write the result to sums
     sums[idx] = sum;
 }}
 
@@ -54,7 +54,7 @@ int main(){
     h_A[i] = 1.0f;
     
   cudaMalloc(&d_A, DSIZE*DSIZE*sizeof(float));  // allocate device space for A
-  FIXME // allocate device space for vector d_sums
+  cudaMalloc(&d_sums, DSIZE*DSIZE*sizeof(float)); // allocate device space for vector d_sums
   cudaCheckErrors("cudaMalloc failure"); // error checking
     
   // copy matrix A to device:
